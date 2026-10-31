@@ -8,6 +8,7 @@
 import numpy as np
 from pathlib import Path
 
+
 PROJECT_DIR = Path(__file__).resolve().parent
 REPORTS_DIR = PROJECT_DIR / "reports"
 REPORTS_DIR.mkdir(exist_ok=True)
@@ -727,8 +728,6 @@ print(results_df.to_string(index=False))
 # 11. Save required CSV files
 # ------------------------------------------------------------
 
-os.makedirs("reports", exist_ok=True)
-
 threshold_df.to_csv(
     REPORTS_DIR / "threshold_results.csv",
     index=False,
@@ -745,8 +744,311 @@ print("\nSaved:")
 print("reports/threshold_results.csv")
 print("reports/assignment_results.csv")
 
- 
 
 
+# ============================================================
+# PART 1: OPTIONAL MATPLOTLIB INTERACTIVE EXPLORER
+# ============================================================
+
+def launch_logistic_gui():
+
+    import matplotlib.pyplot as plt
+    from matplotlib.widgets import Slider, Button
+
+    # Initial values: Case A
+    x_curve = np.linspace(-10, 10, 500)
+
+    initial_beta_0 = -1.0
+    initial_beta_1 = 0.8
+    initial_x = 2.0
+    initial_threshold = 0.50
+
+    # --------------------------------------------------------
+    # Figure layout
+    # --------------------------------------------------------
+
+    fig = plt.figure(figsize=(13, 10))
+
+    fig.suptitle(
+        "Interactive Logistic Regression Explorer",
+        fontsize=16,
+        fontweight="bold",
+        y=0.98
+    )
+
+    # Graph area: extra bottom margin for x-axis label
+    ax = fig.add_axes([0.13, 0.55, 0.76, 0.34])
+
+    ax.set_title("Sigmoid Probability Curve", fontsize=12, pad=12)
+    ax.set_xlabel("Input value (x)", labelpad=12)
+    ax.set_ylabel("Predicted probability", labelpad=12)
+
+    ax.set_xlim(-10, 10)
+    ax.set_ylim(-0.05, 1.05)
+    ax.grid(True, alpha=0.3)
+
+    # --------------------------------------------------------
+    # Logistic regression calculation
+    # --------------------------------------------------------
+
+    def calculate_probability(beta_0, beta_1, x):
+
+        z = beta_0 + beta_1 * x
+        probability = 1 / (1 + np.exp(-z))
+
+        return z, probability
+
+    # Initial curve
+    initial_scores = (
+        initial_beta_0 + initial_beta_1 * x_curve
+    )
+
+    initial_probabilities = (
+        1 / (1 + np.exp(-initial_scores))
+    )
+
+    curve, = ax.plot(
+        x_curve,
+        initial_probabilities,
+        linewidth=2.5,
+        label="Sigmoid curve"
+    )
+
+    threshold_line = ax.axhline(
+        initial_threshold,
+        linestyle="--",
+        linewidth=1.5,
+        label="Classification threshold"
+    )
+
+    input_line = ax.axvline(
+        initial_x,
+        linestyle=":",
+        linewidth=1.5,
+        label="Current input"
+    )
+
+    _, initial_probability = calculate_probability(
+        initial_beta_0,
+        initial_beta_1,
+        initial_x
+    )
+
+    probability_point, = ax.plot(
+        [initial_x],
+        [initial_probability],
+        marker="o",
+        markersize=9,
+        linestyle="None",
+        label="Current probability"
+    )
+
+    ax.legend(loc="lower right", fontsize=9)
+
+    # --------------------------------------------------------
+    # Calculation results: dedicated area
+    # --------------------------------------------------------
+
+    result_text = fig.text(
+        0.50,
+        0.475,
+        "",
+        ha="center",
+        va="center",
+        fontsize=11,
+        linespacing=1.8,
+        bbox={
+            "boxstyle": "round,pad=0.7",
+            "facecolor": "white",
+            "edgecolor": "gray"
+        }
+    )
+
+    # --------------------------------------------------------
+    # Slider layout: labels on the left
+    # --------------------------------------------------------
+
+    slider_rows = [
+        ("Intercept (beta 0)", -5.0, 5.0, initial_beta_0),
+        ("Coefficient (beta 1)", -2.0, 2.0, initial_beta_1),
+        ("Input value (x)", -10.0, 10.0, initial_x),
+        ("Threshold", 0.05, 0.95, initial_threshold)
+    ]
+
+    slider_objects = []
+
+    slider_y_positions = [0.365, 0.295, 0.225, 0.155]
+
+    for (label, minimum, maximum, initial), y_position in zip(
+        slider_rows,
+        slider_y_positions
+    ):
+
+        # Separate label area on the left
+        fig.text(
+            0.08,
+            y_position + 0.005,
+            label,
+            fontsize=10,
+            ha="left",
+            va="center"
+        )
+
+        # Slider begins well to the right of its label
+        slider_ax = fig.add_axes([
+            0.36,
+            y_position - 0.005,
+            0.48,
+            0.025
+        ])
+
+        slider = Slider(
+            slider_ax,
+            "",
+            minimum,
+            maximum,
+            valinit=initial
+        )
+
+        # Numeric value displayed at the right
+        slider.valtext.set_position((1.08, 0.5))
+
+        slider_objects.append(slider)
+
+    beta_0_slider = slider_objects[0]
+    beta_1_slider = slider_objects[1]
+    x_slider = slider_objects[2]
+    threshold_slider = slider_objects[3]
+
+    # --------------------------------------------------------
+    # Update graph and calculations
+    # --------------------------------------------------------
+
+    def update_graph(value=None):
+
+        beta_0 = beta_0_slider.val
+        beta_1 = beta_1_slider.val
+        x = x_slider.val
+        threshold = threshold_slider.val
+
+        z, probability = calculate_probability(
+            beta_0,
+            beta_1,
+            x
+        )
+
+        predicted_class = (
+            1 if probability >= threshold else 0
+        )
+
+        scores = beta_0 + beta_1 * x_curve
+
+        probabilities = (
+            1 / (1 + np.exp(-scores))
+        )
+
+        curve.set_ydata(probabilities)
+
+        threshold_line.set_ydata(
+            [threshold, threshold]
+        )
+
+        input_line.set_xdata([x, x])
+
+        probability_point.set_data(
+            [x],
+            [probability]
+        )
+
+        result_text.set_text(
+            f"Score (z): {z:.4f}       "
+            f"Probability: {probability:.4f}\n"
+            f"Threshold: {threshold:.2f}       "
+            f"Predicted class: {predicted_class}"
+        )
+
+        fig.canvas.draw_idle()
+
+    beta_0_slider.on_changed(update_graph)
+    beta_1_slider.on_changed(update_graph)
+    x_slider.on_changed(update_graph)
+    threshold_slider.on_changed(update_graph)
+
+    # --------------------------------------------------------
+    # Four assignment case buttons
+    # --------------------------------------------------------
+
+    case_settings = [
+        (-1.0, 0.8, 2.0, 0.50),
+        (-1.0, 0.8, 2.0, 0.70),
+        (-1.0, -0.8, 2.0, 0.50),
+        (1.0, 0.0, 2.0, 0.50)
+    ]
+
+    button_width = 0.15
+    button_gap = 0.04
+
+    total_width = (
+        4 * button_width + 3 * button_gap
+    )
+
+    start_position = (1 - total_width) / 2
+
+    case_buttons = []
+
+    def select_case(settings):
+
+        beta_0, beta_1, x, threshold = settings
+
+        beta_0_slider.set_val(beta_0)
+        beta_1_slider.set_val(beta_1)
+        x_slider.set_val(x)
+        threshold_slider.set_val(threshold)
+
+    for index, settings in enumerate(case_settings):
+
+        left = (
+            start_position
+            + index * (button_width + button_gap)
+        )
+
+        button_ax = fig.add_axes([
+            left,
+            0.055,
+            button_width,
+            0.045
+        ])
+
+        button = Button(
+            button_ax,
+            f"Case {chr(65 + index)}"
+        )
+
+        button.on_clicked(
+            lambda event, values=settings: select_case(values)
+        )
+
+        case_buttons.append(button)
+
+    # Footer
+    fig.text(
+        0.50,
+        0.015,
+        "Coefficients are manually adjusted; this explorer does not train a model.",
+        ha="center",
+        fontsize=9
+    )
+
+    update_graph()
+
+    plt.show()
 
 
+# ============================================================
+# OPTIONAL GUI CONTROL
+# ============================================================
+
+RUN_GUI = False  # Set to True to launch the interactive GUI 
+
+if RUN_GUI:
+    launch_logistic_gui()

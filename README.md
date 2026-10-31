@@ -178,45 +178,50 @@ The following files should be available:
 
 The script automatically creates the `reports` folder if it does not already exist.
 
-## 9. Troubleshooting
+## 9 Interactive Logistic Regression Explorer
 
-### Python is not recognized
+An optional interactive explorer built with Matplotlib is included in logistic_regression_analysis.py. It provides a visual way to understand how logistic regression converts a score into a probability and then into a predicted class.
 
-Check that Python is installed correctly and added to your system PATH. Restart the terminal after installation.
+The explorer allows users to manually adjust the intercept ((\beta_0)), coefficient ((\beta_1)), input value ((x)), and classification threshold. It displays the logistic curve along with the resulting score, predicted probability, and classification decision. Preset buttons are also included for the four assignment cases (A, B, C, and D).
 
-### Virtual environment activation is blocked on Windows
+** To launch the interactive explorer:
+1. Open logistic_regression_analysis.py.
+2. Change RUN_GUI = False to RUN_GUI = True near the end of the script.
+3. Save and run the script:
+python logistic_regression_analysis.py
+If the training-loss plot appears first, close that window to open the interactive explorer.
 
-In PowerShell, run:
+To run the main analysis without opening the explorer, keep RUN_GUI = False.
 
-```powershell
-Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
-```
+** Note: The explorer uses manually adjusted coefficients for demonstration. It does not train the breast cancer classification model or learn coefficients from the dataset.
 
-Then activate the environment again:
+## 10. Troubleshooting
 
-```powershell
-.\.venv\Scripts\Activate.ps1
-```
+## Python is not recognized
+ Check that Python is installed and available from the terminal. Verify the installation with:
 
-Alternatively, use Windows Command Prompt:
+python --version
+## On macOS, you may need:
 
-```cmd
-venv\Scripts\activate.bat
-```
+python3 --version
 
-### Required package or module is missing
+## A library is missing
 
-Make sure the virtual environment is activated, then run:
+** Make sure the virtual environment is activated, then run:
 
-```bash
 python -m pip install -r requirements.txt
-```
 
-### Output files are missing
+## The interactive explorer does not open
 
-Check that the Python script completed without errors. Confirm that you are running it from the cloned project directory and check the `reports` folder.
+Make sure RUN_GUI = True and that Matplotlib is using a desktop-compatible backend. If a desktop window is unavailable, the assignment's four cases can be calculated directly in Python.
 
----
+## The reports folder is not updated
+
+Run the script from the project folder and check that it completes without errors. The output files are saved relative to the location of the Python script.
+
+## Project Report
+
+The written project memo is available in Memo.md. It discusses the logistic regression calculations, dataset preparation, model training, evaluation results, threshold selection, and limitations of the analysis.
 
 **Tested environment:** Windows, Python 3.14.3, Visual Studio Code.
 
