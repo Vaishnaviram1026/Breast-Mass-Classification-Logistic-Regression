@@ -17,9 +17,11 @@ One thing I noticed was that Cases A and B have exactly the same probability, bu
 
 ## 2. Dataset and Data Preparation
 
-For this project, I used the Wisconsin Diagnostic Breast Cancer dataset available through `sklearn.datasets.load_breast_cancer()`. The dataset contains 569 observations. I selected two features for the analysis: mean radius and mean texture. I also recoded the target variable so that malignant cases were represented by 1 and benign cases by 0. The dataset contains 212 malignant cases and 357 benign cases.
+For this project, I used the Wisconsin Diagnostic Breast Cancer dataset available through `sklearn.datasets.load_breast_cancer()`. The dataset contains 569 observations. I selected two features for the analysis: mean radius and mean texture. I also recoded the target variable so that malignant cases were represented by 1 and benign cases by 0. The dataset contains 212 malignant cases and 357 benign cases. The data was accessed through scikit-learn's built-in loader, which provides the Wisconsin Diagnostic Breast Cancer dataset from the UCI Machine Learning Repository.
 
-I divided the data into training, validation, and test sets using stratified splitting and a random seed of 42. This helped maintain the class proportions across the three sets. I used the training set to fit the standard scaler and then applied that same scaler to the validation and test sets. I followed this process to avoid data leakage, since information from the validation and test sets should not influence the training process.
+I divided the data into training, validation, and test sets using stratified splitting and a random seed of 42. The training set contained 341 observations, the validation set contained 114, and the test set contained 114. The training set included 214 benign and 127 malignant cases; the validation set included 71 benign and 43 malignant cases; and the test set included 72 benign and 42 malignant cases. I also checked that the three sets did not overlap and that all 569 observations were accounted for.
+
+I used the training set to fit the standard scaler and then applied that same scaler to the validation and test sets. I followed this process to avoid data leakage, since information from the validation and test sets should not influence the training process.
 
 ## 3. Building and Comparing the Models
 
@@ -63,7 +65,7 @@ Overall, this project helped me understand the complete classification process, 
 
 ---
 
-## Research Process 
+## Research Process
 
 One important decision I made during this project was to code malignant cases as the positive class. This made it easier to interpret the model's predictions and understand the consequences of false negatives. I also used stratified splitting and a fixed random seed so that the results could be reproduced.
 
